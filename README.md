@@ -1,230 +1,88 @@
-Telegram Mini App Course MVP
+# Telegram Mini App MVP
 
-MVP for Telegram Mini App course with data source from /course/*.md.
+Актуальная структура проекта:
 
-Architecture
-
-
-
-
-
-course/ — editable content source (markdown files).
-
-
-
-backend/ — Node.js + Express API, markdown parser, in-memory analytics tracking.
-
-
-
-frontend/ — React Mini App UI (modules, lessons, lesson screen).
-
-
-
-bot/ — Telegram bot with web_app button.
-
-Backend parses course/*.md and regenerates backend/data/course.json automatically when source files change (checked by mtime/size signature).
-
-Project structure
-
-content-system/
-  course/
-    course_structure.md
-    module_1.md
-    module_2.md
-    module_3.md
-    lessons.md
-    materials.md
+```text
+mini-app/
   backend/
-    src/
-      server.js
-      db.js
-      courseLoader.js
-    data/
-      course.json (auto)
-    package.json
-    .env.example
   frontend/
-    src/
-      main.jsx
-      App.jsx
-      styles.css
-    index.html
-    package.json
-    vite.config.js
-    .env.example
   bot/
-    index.js
-    package.json
-    .env.example
+  course/
+  README.md
+```
 
-API
+## Что внутри
 
+- `backend` — API, парсинг markdown-курса, генерация `course.json`, in-memory трекинг.
+- `frontend` — React Mini App (модули → уроки → урок).
+- `bot` — Telegram bot с кнопкой открытия Mini App.
+- `course` — исходные markdown-файлы курса (`course_structure.md`, `module_1..3.md`, `lessons.md`, `materials.md`).
 
+## Важно по данным курса
 
+Backend читает данные только из `mini-app/course` (путь относительно `backend`: `../course`).
+Никаких абсолютных путей и старых путей проекта не используется.
 
+## Local run
 
-GET /modules
+Все команды ниже выполняются из корня `mini-app` в отдельных терминалах.
 
-
-
-GET /modules/:id
-
-
-
-GET /lessons/:id
-
-
-
-POST /track
-
-Track payload example:
-
-{
-  "user_id": "123456",
-  "username": "alex",
-  "event_type": "open_lesson",
-  "module_id": "module_1",
-  "lesson_id": "module_1_lesson_1",
-  "timestamp": "2026-04-28T00:00:00.000Z"
-}
-
-How to edit course content via /course
-
-1) Module metadata
-
-Use module_1.md, module_2.md, module_3.md:
-
-# Module 1
-Title: Your module title
-Description: Your module description
-Result: Your module result
-
-2) Lessons
-
-Use lessons.md blocks:
-
-## module_1
-- Lesson title | Lesson preview | https://www.youtube.com/embed/VIDEO_ID
-
-3) Materials
-
-Use materials.md:
-
-module_1_lesson_1: demo.pdf, text.md, checklist.pdf
-
-After editing markdown, just refresh frontend page. Backend picks up changes and rebuilds course.json.
-
-Replace demo content with real content
-
-
-
-
-
-Update titles/descriptions/results in module_*.md.
-
-
-
-Replace lesson lines in lessons.md for each module_1..module_3.
-
-
-
-Replace file names in materials.md by lesson id.
-
-
-
-Replace placeholder video URLs with real embed URLs.
-
-Local run
-
-Backend
-
+```bash
 cd backend
 npm install
 cp .env.example .env
 npm run dev
+```
 
-Frontend
-
+```bash
 cd frontend
 npm install
 cp .env.example .env
 npm run dev
+```
 
-Bot
-
+```bash
 cd bot
 npm install
 cp .env.example .env
 npm start
+```
 
-Set WEB_APP_URL in bot/.env to deployed frontend URL.
+## ENV
 
-Storage mode
+### Backend
 
-Current MVP uses in-memory storage for users/progress events, so backend starts on Windows without native module build.
+Файл: `backend/.env`
 
+```env
+PORT=4000
+FRONTEND_ORIGIN=http://localhost:5173
+```
 
+### Frontend
 
+Файл: `frontend/.env`
 
+```env
+VITE_API_URL=http://localhost:4000
+```
 
-users collection (in memory)
+### Bot
 
+Файл: `bot/.env`
 
+```env
+BOT_TOKEN=your_telegram_bot_token
+WEB_APP_URL=https://your-mini-app-domain.example
+```
 
-progress collection (in memory)
+`WEB_APP_URL` читается из `.env`, в коде нет захардкоженных localhost URL.
 
-If backend restarts, analytics data is reset.
+## API
 
-Deploy (simple)
+- `GET /modules`
+- `GET /modules/:id`
+- `GET /lessons/:id`
+- `POST /track`
+Deployment trigger update.
 
-Backend
-
-
-
-
-
-Deploy to Render/Railway/Fly.io as Node service.
-
-
-
-Set env vars: PORT, FRONTEND_ORIGIN.
-
-Frontend
-
-
-
-
-
-Deploy frontend to Vercel/Netlify.
-
-
-
-Set VITE_API_URL to deployed backend URL.
-
-Bot
-
-
-
-
-
-Deploy bot as Node worker (Railway/Render).
-
-
-
-Set BOT_TOKEN and WEB_APP_URL.
-
-Notes
-
-
-
-
-
-Telegram user is read from window.Telegram.WebApp.initDataUnsafe.user.
-
-
-
-In local browser (outside Telegram), frontend falls back to demo user.
-
-
-
-Events tracked: enter_app, open_module, open_lesson.

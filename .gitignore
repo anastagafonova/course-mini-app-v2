@@ -1,0 +1,14 @@
+# Dependencies
+**/node_modules/
+
+# Local env (never commit secrets)
+**/.env
+
+# Generated / local data
+backend/data/*.db
+backend/data/course.json
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
