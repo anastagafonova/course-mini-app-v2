@@ -53,12 +53,12 @@ const AI_STARTERS = [
 ];
 
 const UNLOCKED_MODULE_ID = "module_1";
-const UNLOCKED_LESSON_IDS = new Set([
-  "module_1_lesson_1",
-  "module_1_lesson_2",
-  "module_1_lesson_3",
-  "module_1_lesson_4"
-]);
+const UNLOCKED_LESSON_COUNT = 4;
+
+function getLessonNumber(lessonId) {
+  const match = String(lessonId).match(/_lesson_(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
 
 const LESSON_1_OUTCOMES = [
   "Поймете, что такое «сценарий жизни» и почему он важнее красивой картинки.",
@@ -172,7 +172,7 @@ function isLessonLocked(lesson, moduleId) {
   if (moduleId !== UNLOCKED_MODULE_ID) {
     return true;
   }
-  return !UNLOCKED_LESSON_IDS.has(lesson.id);
+  return getLessonNumber(lesson.id) > UNLOCKED_LESSON_COUNT;
 }
 
 function LockIcon() {
